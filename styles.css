@@ -1,0 +1,80 @@
+
+:root {
+  --bg-start: #0a0a23;
+  --bg-end: #1a1a40;
+  --card-bg: rgba(255, 255, 255, 0.08);
+  --text-color: #f0f0f0;
+  --accent-color: #00e0ff;
+  --accent-hover: #00bcd4;
+  --shadow-color: rgba(0, 224, 255, 0.3);
+  font-family: 'Segoe UI', Roboto, sans-serif;
+}
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  background: linear-gradient(180deg, var(--bg-start), var(--bg-end));
+  color: var(--text-color);
+}
+header {
+  padding: 20px;
+  text-align: center;
+  background: transparent;
+}
+h1 {
+  font-size: 24px;
+  margin: 0;
+}
+.subtitle {
+  font-size: 14px;
+  opacity: 0.7;
+}
+main {
+  padding: 16px;
+}
+.card {
+  background: var(--card-bg);
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
+  animation: fadeIn 0.6s ease-in-out;
+}
+button {
+  display: inline-block;
+  padding: 10px 16px;
+  border-radius: 10px;
+  border: none;
+  background: var(--accent-color);
+  color: #000;
+  font-weight: bold;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 0 10px var(--shadow-color);
+}
+button:hover, button:active {
+  background: var(--accent-hover);
+  transform: scale(1.05);
+  box-shadow: 0 0 15px var(--shadow-color);
+}
+.output {
+  margin-top: 12px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+label {
+  display: block;
+  margin: 10px 0;
+}
+footer {
+  padding: 16px;
+  text-align: center;
+  font-size: 12px;
+  color: #aaa;
+}
+@keyframes fadeIn {
+  from {opacity: 0; transform: translateY(10px);}
+  to {opacity: 1; transform: translateY(0);}
+}

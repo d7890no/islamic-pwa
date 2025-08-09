@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>MyIslamicApp — Prayer • Qur'an • Hadith • Prophets</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header>
+    <h1>MyIslamicApp</h1>
+    <p class="subtitle">Prayer times • Qur'an • Hadith • Prophets</p>
+  </header>
+
+  <main>
+    <section id="prayer-section" class="card">
+      <h2>Prayer Times</h2>
+      <button id="get-times">Get Prayer Times (Using device location)</button>
+      <div id="prayer-output" class="output"></div>
+    </section>
+
+    <section id="quran-section" class="card">
+      <h2>Qur'an (read)</h2>
+      <label>Surah number (1–114): <input id="surah-num" type="number" min="1" max="114" value="1" /></label>
+      <button id="load-surah">Load Surah</button>
+      <div id="surah-output" class="output"></div>
+    </section>
+
+    <section id="hadith-section" class="card">
+      <h2>Hadith (sample)</h2>
+      <button id="random-hadith">Show random hadith</button>
+      <div id="hadith-output" class="output"></div>
+    </section>
+
+    <section id="prophet-section" class="card">
+      <h2>Prophet Stories (sample)</h2>
+      <button id="list-prophets">List prophets</button>
+      <div id="prophet-output" class="output"></div>
+    </section>
+  </main>
+
+  <footer>
+    <small>Works offline for core content. Uses internet for live prayer and Qur'an API.</small>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
