@@ -31,10 +31,16 @@ let countdownInterval = null;
 // Utilities
 function normalizeToHHMM(timeStr){
   if (!timeStr) return null;
-  const m = String(timeStr).match(/(\d{1,2}):(\d{2})/);
+  const s = String(timeStr).trim();
+  // capture hh:mm with optional am/pm (case-insensitive), ignoring any trailing parentheses
+  const m = s.match(/^(\d{1,2}):(\d{2})\s*(AM|PM|am|pm)?/);
   if (!m) return null;
-  const hh = Math.max(0, Math.min(23, parseInt(m[1], 10)));
+  let hh = parseInt(m[1], 10);
   const mm = Math.max(0, Math.min(59, parseInt(m[2], 10)));
+  const ap = m[3] ? m[3].toLowerCase() : null;
+  if (ap === 'pm' && hh < 12) hh += 12;
+  if (ap === 'am' && hh === 12) hh = 0;
+  hh = Math.max(0, Math.min(23, hh));
   return `${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}`;
 }
 function fmtTime24To12(tStr){
@@ -406,6 +412,7 @@ function showHomePage() {
       <button class="tool" onclick="showPage('zakat')">Zakat</button>
       <button class="tool" onclick="showPage('hijri')">Hijri</button>
       <button class="tool" onclick="showProphetStoriesPage()">Prophet Stories</button>
+      <button class="tool" onclick="openSetLocation()">Set Location</button>
     </section>
 
     <section class="tracker card">
@@ -1285,6 +1292,25 @@ function shareProphetStory(prophetId) {
     }).catch(() => {
       alert('Unable to share. Please copy the URL manually.');
     });
+  }
+}
+
+function openSetLocation(){
+  const raw = prompt('Enter coordinates as latitude,longitude (e.g., 3.1390,101.6869). Optionally add a label after a semicolon: lat,lon; Label');
+  if (!raw) return;
+  try{
+    const [coords, labelPart] = raw.split(';');
+    const [latStr, lonStr] = coords.split(',');
+    const lat = parseFloat(latStr.trim());
+    const lon = parseFloat(lonStr.trim());
+    if (isNaN(lat) || isNaN(lon)) throw new Error('Invalid numbers');
+    const label = labelPart ? labelPart.trim() : `${lat.toFixed(2)}, ${lon.toFixed(2)}`;
+    saveLocation(lat, lon, label);
+    const countryEl = document.getElementById('country');
+    if (countryEl) countryEl.textContent = label;
+    fetchPrayerTimes(lat, lon);
+  }catch(e){
+    alert('Invalid format. Please use: lat,lon or lat,lon; Label');
   }
 }
 
