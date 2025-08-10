@@ -12,15 +12,15 @@ const prayerStorageKey = 'prayerTracker_v1';
 const cachedTimesKey = 'lastPrayerTimes_v1';
 
 // UI elements
-const nextPrayerNameEl = document.getElementById('nextPrayerName');
-const nextPrayerTimeEl = document.getElementById('nextPrayerTime');
-const remainingTimeEl = document.getElementById('remainingTime');
-const countText = document.getElementById('countText');
-const fgRing = document.querySelector('.fg-ring');
-const prayerRow = document.getElementById('prayerRow');
-const trackerRow = document.getElementById('trackerRow');
-const hadithText = document.getElementById('hadithText');
-const hadithSource = document.getElementById('hadithSource');
+let nextPrayerNameEl = document.getElementById('nextPrayerName');
+let nextPrayerTimeEl = document.getElementById('nextPrayerTime');
+let remainingTimeEl = document.getElementById('remainingTime');
+let countText = document.getElementById('countText');
+let fgRing = document.querySelector('.fg-ring');
+let prayerRow = document.getElementById('prayerRow');
+let trackerRow = document.getElementById('trackerRow');
+let hadithText = document.getElementById('hadithText');
+let hadithSource = document.getElementById('hadithSource');
 
 // state
 let todayTimings = null;
@@ -165,7 +165,7 @@ function startCountdown(targetDate){
       remainingTimeEl.textContent = '00:00:00';
       countText.textContent = '00:00:00';
       // refresh prayer times after small delay
-      setTimeout(()=> init(), 2000);
+      setTimeout(()=> initHomePage(), 2000);
       return;
     }
     const hrs = Math.floor(diff/3600000); diff%=3600000;
@@ -795,11 +795,22 @@ function showHijriPage() {
 }
 
 // start
-init();
+// init();
 
 
 // Helper functions for page functionality
 function initHomePage() {
+  // Rebind dynamic elements after DOM rebuild
+  nextPrayerNameEl = document.getElementById('nextPrayerName');
+  nextPrayerTimeEl = document.getElementById('nextPrayerTime');
+  remainingTimeEl = document.getElementById('remainingTime');
+  countText = document.getElementById('countText');
+  fgRing = document.querySelector('.fg-ring');
+  prayerRow = document.getElementById('prayerRow');
+  trackerRow = document.getElementById('trackerRow');
+  hadithText = document.getElementById('hadithText');
+  hadithSource = document.getElementById('hadithSource');
+
   renderTracker();
   loadHadith();
   // set initial ring dasharray
@@ -1111,8 +1122,13 @@ document.addEventListener('DOMContentLoaded', ()=> {
   showPage('home');
 });
 
+// Register service worker for offline capability and cache updates
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(e => console.warn('SW failed', e));
+}
+
 // start
-init();
+// init();
 
 
 

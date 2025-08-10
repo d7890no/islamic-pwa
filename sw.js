@@ -1,8 +1,9 @@
-const CACHE_NAME = 'my-islamic-app-v1';
+const CACHE_NAME = 'my-islamic-app-v2';
 const FILES_TO_CACHE = [
   '/',
   '/index.html',
   '/styles.css',
+  '/script.js',
   '/app.js',
   '/manifest.json',
   '/data/hadiths.json',
@@ -17,7 +18,10 @@ self.addEventListener('install', (evt) => {
 });
 
 self.addEventListener('activate', (evt) => {
-  evt.waitUntil(self.clients.claim());
+  evt.waitUntil(
+    caches.keys().then(keys => Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k))))
+  );
+  self.clients.claim();
 });
 
 self.addEventListener('fetch', (evt) => {
