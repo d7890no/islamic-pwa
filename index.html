@@ -1,79 +1,26 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>Deen — Home</title>
-  <link rel="manifest" href="manifest.json" />
-  <link rel="stylesheet" href="styles.css" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Islamic App</title>
+<link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div id="app">
-    <header class="topbar">
-      <div class="left">Today</div>
-      <div class="right" id="country">—</div>
-    </header>
-
-    <main>
-      <section class="hero card">
-        <div class="hero-left">
-          <div class="alarm-icon" title="Prayer alarm">🔔</div>
-          <div class="next-prayer-label">Next Prayer</div>
-          <div class="next-prayer-name" id="nextPrayerName">--</div>
-          <div class="next-prayer-time" id="nextPrayerTime">--:--</div>
-          <div class="remaining" id="remainingTime">--:--:--</div>
-        </div>
-        <div class="hero-right">
-          <svg id="countdown" viewBox="0 0 120 120" class="countdown-svg">
-            <circle cx="60" cy="60" r="52" class="bg-ring"></circle>
-            <circle cx="60" cy="60" r="52" class="fg-ring" stroke-dasharray="327" stroke-dashoffset="0"></circle>
-            <text x="60" y="62" text-anchor="middle" class="count-text" id="countText">--:--:--</text>
-          </svg>
-        </div>
-      </section>
-
-      <nav class="prayer-row card" id="prayerRow">
-        <!-- prayer times injected here -->
-      </nav>
-
-      <section class="grid card" id="toolsGrid">
-        <!-- icons -->
-        <button class="tool" id="btnPrayer">Prayer Time</button>
-        <button class="tool" id="btnQuran">Al-Quran</button>
-        <button class="tool" id="btnHadith">Hadith</button>
-        <button class="tool" id="btnDua">Dua</button>
-        <button class="tool" id="btnQibla">Qibla</button>
-        <button class="tool" id="btnTasbih">Tasbih</button>
-        <button class="tool" id="btnZakat">Zakat</button>
-        <button class="tool" id="btnHijri">Hijri</button>
-      </section>
-
-      <section class="tracker card">
-        <h3>Prayer Tracker</h3>
-        <div class="tracker-row" id="trackerRow">
-          <!-- tracker pills -->
-        </div>
-      </section>
-
-      <section class="hadith card" id="hadithCard">
-        <div class="quote">“</div>
-        <div class="hadith-body">
-          <h4>Daily Hadith</h4>
-          <p id="hadithText">Loading…</p>
-        </div>
-        <div class="hadith-badge" id="hadithSource">—</div>
-      </section>
-    </main>
-
-    <footer class="bottom-nav">
-      <button class="nav-btn active">Home</button>
-      <button class="nav-btn">Stats</button>
-      <button class="nav-btn">Quran</button>
-      <button class="nav-btn">Community</button>
-      <button class="nav-btn">Settings</button>
-    </footer>
-  </div>
-
-  <script src="script.js"></script>
+<div id="app">
+  <header>
+    <h1>Prayer Tracker</h1>
+  </header>
+  <main id="content">
+    <!-- SPA Content will be injected here -->
+  </main>
+  <nav class="bottom-nav">
+    <button data-page="home"><img src="icons/home.svg" alt="Home"><span>Home</span></button>
+    <button data-page="quran"><img src="icons/quran.svg" alt="Quran"><span>Quran</span></button>
+    <button data-page="hadith"><img src="icons/hadith.svg" alt="Hadith"><span>Hadith</span></button>
+    <button data-page="prophets"><img src="icons/prophets.svg" alt="Prophets"><span>Prophets</span></button>
+  </nav>
+</div>
+<script src="script.js"></script>
 </body>
 </html>
