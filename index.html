@@ -2,48 +2,78 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>MyIslamicApp — Prayer • Qur'an • Hadith • Prophets</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Deen — Home</title>
   <link rel="manifest" href="manifest.json" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <header>
-    <h1>MyIslamicApp</h1>
-    <p class="subtitle">Prayer times • Qur'an • Hadith • Prophets</p>
-  </header>
+  <div id="app">
+    <header class="topbar">
+      <div class="left">Today</div>
+      <div class="right" id="country">—</div>
+    </header>
 
-  <main>
-    <section id="prayer-section" class="card">
-      <h2>Prayer Times</h2>
-      <button id="get-times">Get Prayer Times (Using device location)</button>
-      <div id="prayer-output" class="output"></div>
-    </section>
+    <main>
+      <section class="hero card">
+        <div class="hero-left">
+          <div class="alarm-icon" title="Prayer alarm">🔔</div>
+          <div class="next-prayer-label">Next Prayer</div>
+          <div class="next-prayer-name" id="nextPrayerName">--</div>
+          <div class="next-prayer-time" id="nextPrayerTime">--:--</div>
+          <div class="remaining" id="remainingTime">--:--:--</div>
+        </div>
+        <div class="hero-right">
+          <svg id="countdown" viewBox="0 0 120 120" class="countdown-svg">
+            <circle cx="60" cy="60" r="52" class="bg-ring"></circle>
+            <circle cx="60" cy="60" r="52" class="fg-ring" stroke-dasharray="327" stroke-dashoffset="0"></circle>
+            <text x="60" y="62" text-anchor="middle" class="count-text" id="countText">--:--:--</text>
+          </svg>
+        </div>
+      </section>
 
-    <section id="quran-section" class="card">
-      <h2>Qur'an (read)</h2>
-      <label>Surah number (1–114): <input id="surah-num" type="number" min="1" max="114" value="1" /></label>
-      <button id="load-surah">Load Surah</button>
-      <div id="surah-output" class="output"></div>
-    </section>
+      <nav class="prayer-row card" id="prayerRow">
+        <!-- prayer times injected here -->
+      </nav>
 
-    <section id="hadith-section" class="card">
-      <h2>Hadith (sample)</h2>
-      <button id="random-hadith">Show random hadith</button>
-      <div id="hadith-output" class="output"></div>
-    </section>
+      <section class="grid card" id="toolsGrid">
+        <!-- icons -->
+        <button class="tool" id="btnPrayer">Prayer Time</button>
+        <button class="tool" id="btnQuran">Al-Quran</button>
+        <button class="tool" id="btnHadith">Hadith</button>
+        <button class="tool" id="btnDua">Dua</button>
+        <button class="tool" id="btnQibla">Qibla</button>
+        <button class="tool" id="btnTasbih">Tasbih</button>
+        <button class="tool" id="btnZakat">Zakat</button>
+        <button class="tool" id="btnHijri">Hijri</button>
+      </section>
 
-    <section id="prophet-section" class="card">
-      <h2>Prophet Stories (sample)</h2>
-      <button id="list-prophets">List prophets</button>
-      <div id="prophet-output" class="output"></div>
-    </section>
-  </main>
+      <section class="tracker card">
+        <h3>Prayer Tracker</h3>
+        <div class="tracker-row" id="trackerRow">
+          <!-- tracker pills -->
+        </div>
+      </section>
 
-  <footer>
-    <small>Works offline for core content. Uses internet for live prayer and Qur'an API.</small>
-  </footer>
+      <section class="hadith card" id="hadithCard">
+        <div class="quote">“</div>
+        <div class="hadith-body">
+          <h4>Daily Hadith</h4>
+          <p id="hadithText">Loading…</p>
+        </div>
+        <div class="hadith-badge" id="hadithSource">—</div>
+      </section>
+    </main>
 
-  <script src="app.js"></script>
+    <footer class="bottom-nav">
+      <button class="nav-btn active">Home</button>
+      <button class="nav-btn">Stats</button>
+      <button class="nav-btn">Quran</button>
+      <button class="nav-btn">Community</button>
+      <button class="nav-btn">Settings</button>
+    </footer>
+  </div>
+
+  <script src="script.js"></script>
 </body>
 </html>
