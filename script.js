@@ -977,7 +977,25 @@ function showDua(duaId) {
 }
 
 function filterDuas(category) {
-  alert(`Filtering duas by ${category} category. Feature coming soon!`);
+  if (!window.currentDuas) return;
+  const main = document.querySelector('main');
+  const filtered = window.currentDuas.filter(d => d.category && d.category.toLowerCase().includes(category.toLowerCase()));
+  const listHtml = filtered.map(dua => `
+    <div class="dua-item" onclick="showDua('${dua.id}')">
+      <div class="dua-icon">${dua.icon}</div>
+      <div class="dua-info">
+        <div class="dua-name">${dua.title}</div>
+        <div class="dua-details">${dua.category}</div>
+      </div>
+    </div>
+  `).join('');
+  const section = `
+    <section class="card">
+      <h3>Category: ${category}</h3>
+      <div class="dua-list">${listHtml || '<div style=\'color:var(--muted)\'>No duas found.</div>'}</div>
+    </section>
+  `;
+  main.insertAdjacentHTML('beforeend', section);
 }
 
 // Qibla functionality
@@ -1018,31 +1036,36 @@ function initQibla() {
     const bearingEl = document.getElementById('qiblaBearing');
     const distanceEl = document.getElementById('distanceToKaaba');
     const needleEl = document.getElementById('needle');
+    const locationEl = document.getElementById('userLocation');
     
     if (directionEl) directionEl.textContent = `${Math.round(qiblaDirection)}°`;
     if (bearingEl) bearingEl.textContent = `${Math.round(qiblaDirection)}°`;
     if (distanceEl) distanceEl.textContent = `${Math.round(distance)} km`;
     if (needleEl) needleEl.style.transform = `translate(-50%, -100%) rotate(${qiblaDirection}deg)`;
+    if (locationEl) locationEl.textContent = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
   }
 
-  // Get user location
+  // Prefer saved location; fallback to geolocation
+  const saved = loadSavedLocation();
+  if (saved) {
+    updateQiblaInfo(saved.lat, saved.lon);
+    return;
+  }
+
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const lat = position.coords.latitude;
         const lng = position.coords.longitude;
-        const locationEl = document.getElementById('userLocation');
-        if (locationEl) locationEl.textContent = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
         updateQiblaInfo(lat, lng);
       },
-      (error) => {
-        const locationEl = document.getElementById('userLocation');
+      () => {
         const directionEl = document.getElementById('qiblaDirection');
         const bearingEl = document.getElementById('qiblaBearing');
         const distanceEl = document.getElementById('distanceToKaaba');
-        
+        const locationEl = document.getElementById('userLocation');
         if (locationEl) locationEl.textContent = 'Location access denied';
-        if (directionEl) directionEl.textContent = 'Enable location';
+        if (directionEl) directionEl.textContent = 'Enable location or set location';
         if (bearingEl) bearingEl.textContent = 'N/A';
         if (distanceEl) distanceEl.textContent = 'N/A';
       }
