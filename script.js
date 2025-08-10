@@ -11,6 +11,7 @@ const prayerNames = ['Fajr','Dhuhr','Asr','Maghrib','Isha'];
 const prayerStorageKey = 'prayerTracker_v1';
 const cachedTimesKey = 'lastPrayerTimes_v1';
 const savedLocationKey = 'savedLocation_v1';
+const prayerSettingsKey = 'prayerCalcSettings_v1';
 
 // UI elements
 let nextPrayerNameEl = document.getElementById('nextPrayerName');
@@ -66,7 +67,25 @@ function loadSavedLocation(){
   }catch(_){ return null; }
 }
 function saveLocation(lat, lon, label){
-  try { localStorage.setItem(savedLocationKey, JSON.stringify({lat, lon, label: label || `${lat.toFixed(2)}, ${lon.toFixed(2)}`})); }catch(_){}
+  try { localStorage.setItem(savedLocationKey, JSON.stringify({lat, lon, label: label || `${lat.toFixed(2)}, ${lon.toFixed(2)}`})); }catch(_){ }
+}
+
+function loadPrayerSettings(){
+  try{
+    const raw = localStorage.getItem(prayerSettingsKey);
+    if (!raw) return { method: 3, school: 0, latitudeAdjustmentMethod: 3 };
+    const obj = JSON.parse(raw);
+    return {
+      method: Number.isInteger(obj.method) ? obj.method : 3,
+      school: (obj.school === 1 ? 1 : 0),
+      latitudeAdjustmentMethod: [0,1,2,3].includes(obj.latitudeAdjustmentMethod) ? obj.latitudeAdjustmentMethod : 3
+    };
+  }catch(_){
+    return { method: 3, school: 0, latitudeAdjustmentMethod: 3 };
+  }
+}
+function savePrayerSettings(settings){
+  try { localStorage.setItem(prayerSettingsKey, JSON.stringify(settings)); } catch(_) {}
 }
 
 // Load cached times if available
@@ -123,11 +142,14 @@ function renderTracker(){
   });
 }
 
-// Fetch prayer times using Aladhan (timezone-aware)
+// Fetch prayer times using Aladhan (timezone-aware with settings)
 async function fetchPrayerTimes(lat, lon){
   try{
     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    const resp = await fetch(`https://api.aladhan.com/v1/timings?latitude=${lat}&longitude=${lon}&method=2&timezonestring=${encodeURIComponent(tz)}`);
+    const ts = Math.floor(Date.now()/1000); // current local timestamp
+    const { method, school, latitudeAdjustmentMethod } = loadPrayerSettings();
+    const url = `https://api.aladhan.com/v1/timings/${ts}?latitude=${lat}&longitude=${lon}&method=${method}&school=${school}&latitudeAdjustmentMethod=${latitudeAdjustmentMethod}&timezonestring=${encodeURIComponent(tz)}`;
+    const resp = await fetch(url);
     const data = await resp.json();
     if(data.code !== 200) throw new Error('Bad response');
     const timings = data.data.timings;
@@ -157,7 +179,7 @@ function renderPrayerRow(timings){
     const t = timings[name];
     const el = document.createElement('div');
     el.className = 'pray' + (name === (nextPrayerIndexName()) ? ' active' : '');
-    el.innerHTML = `<div style="font-weight:700">${name}</div><div style="font-size:12px;color:var(--muted)">${fmtTime24To12(t)}</div>`;
+    el.innerHTML = `<div style="font-weight:700">${name}</div><div style=\"font-size:12px;color:var(--muted)\">${fmtTime24To12(t)}</div>`;
     prayerRow.appendChild(el);
   });
 }
@@ -230,20 +252,19 @@ function startCountdown(targetDate){
 function updateRing(targetDate){
   if (!fgRing) return;
   const now = new Date();
-  const total = targetDate.getTime() - now.getTime();
   // find previous prayer time to compute span
   const order = ['Fajr','Dhuhr','Asr','Maghrib','Isha'];
   const idx = nextPrayerIndex;
   let prevIdx = (idx -1 + order.length)%order.length;
   let prevTime = parseTimeToDate(todayTimings[order[prevIdx]]);
-  if(prevTime.getTime() > targetDate.getTime()){
+  if(prevTime && prevTime.getTime() > targetDate.getTime()){
     // prev is yesterday; shift back one day
     prevTime = new Date(prevTime.getTime() - 24*3600*1000);
   }
+  if (!prevTime || isNaN(prevTime.getTime())) return;
   const span = targetDate.getTime() - prevTime.getTime();
   const remaining = targetDate.getTime() - Date.now();
   const ratio = Math.max(0, Math.min(1, remaining / span));
-  // circle circumference = 2*pi*r where r=52 -> ~326.7
   const circ = 2 * Math.PI * 52;
   const offset = Math.round(circ * (1 - ratio));
   fgRing.style.strokeDashoffset = offset;
@@ -413,6 +434,7 @@ function showHomePage() {
       <button class="tool" onclick="showPage('hijri')">Hijri</button>
       <button class="tool" onclick="showProphetStoriesPage()">Prophet Stories</button>
       <button class="tool" onclick="openSetLocation()">Set Location</button>
+      <button class="tool" onclick="openPrayerSettings()">Prayer Settings</button>
     </section>
 
     <section class="tracker card">
@@ -1292,25 +1314,6 @@ function shareProphetStory(prophetId) {
     }).catch(() => {
       alert('Unable to share. Please copy the URL manually.');
     });
-  }
-}
-
-function openSetLocation(){
-  const raw = prompt('Enter coordinates as latitude,longitude (e.g., 3.1390,101.6869). Optionally add a label after a semicolon: lat,lon; Label');
-  if (!raw) return;
-  try{
-    const [coords, labelPart] = raw.split(';');
-    const [latStr, lonStr] = coords.split(',');
-    const lat = parseFloat(latStr.trim());
-    const lon = parseFloat(lonStr.trim());
-    if (isNaN(lat) || isNaN(lon)) throw new Error('Invalid numbers');
-    const label = labelPart ? labelPart.trim() : `${lat.toFixed(2)}, ${lon.toFixed(2)}`;
-    saveLocation(lat, lon, label);
-    const countryEl = document.getElementById('country');
-    if (countryEl) countryEl.textContent = label;
-    fetchPrayerTimes(lat, lon);
-  }catch(e){
-    alert('Invalid format. Please use: lat,lon or lat,lon; Label');
   }
 }
 
