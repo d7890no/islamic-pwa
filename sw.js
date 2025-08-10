@@ -1,13 +1,18 @@
-const CACHE_NAME = 'my-islamic-app-v2';
+const CACHE_NAME = 'my-islamic-app-v3';
 const FILES_TO_CACHE = [
-  '/',
-  '/index.html',
-  '/styles.css',
-  '/script.js',
-  '/app.js',
-  '/manifest.json',
-  '/data/hadiths.json',
-  '/data/prophets.json'
+  './',
+  './index.html',
+  './styles.css',
+  './script.js',
+  './manifest.json',
+  './data/hadiths.json',
+  './data/duas.json',
+  './data/quran_surahs.json',
+  './data/prophet_stories.json',
+  './icons/home.svg',
+  './icons/quran.svg',
+  './icons/hadith.svg',
+  './icons/prophets.svg'
 ];
 
 self.addEventListener('install', (evt) => {
@@ -27,7 +32,7 @@ self.addEventListener('activate', (evt) => {
 self.addEventListener('fetch', (evt) => {
   evt.respondWith(
     caches.match(evt.request).then((r) => {
-      return r || fetch(evt.request).catch(()=>caches.match('/index.html'));
+      return r || fetch(evt.request).catch(()=>caches.match('./index.html'));
     })
   );
 });
