@@ -29,19 +29,28 @@ let nextPrayerIndex = null;
 let countdownInterval = null;
 
 // Utilities
+function normalizeToHHMM(timeStr){
+  if (!timeStr) return null;
+  const m = String(timeStr).match(/(\d{1,2}):(\d{2})/);
+  if (!m) return null;
+  const hh = Math.max(0, Math.min(23, parseInt(m[1], 10)));
+  const mm = Math.max(0, Math.min(59, parseInt(m[2], 10)));
+  return `${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}`;
+}
 function fmtTime24To12(tStr){
-  // input "13:21"
-  const [h,m] = tStr.split(':').map(Number);
+  const norm = normalizeToHHMM(tStr);
+  if (!norm) return '--:--';
+  const [h,m] = norm.split(':').map(Number);
   const am = h < 12;
   const hour = ((h + 11) % 12) + 1;
   return `${hour}:${String(m).padStart(2,'0')} ${am ? 'AM' : 'PM'}`;
 }
 function parseTimeToDate(timeStr){
-  // timeStr like "13:21"
+  const norm = normalizeToHHMM(timeStr);
+  if (!norm) return null;
   const now = new Date();
-  const [h,m] = timeStr.split(':').map(Number);
-  const d = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m, 0);
-  return d;
+  const [h,m] = norm.split(':').map(Number);
+  return new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m, 0);
 }
 
 function loadSavedLocation(){
@@ -51,7 +60,7 @@ function loadSavedLocation(){
   }catch(_){ return null; }
 }
 function saveLocation(lat, lon, label){
-  try{ localStorage.setItem(savedLocationKey, JSON.stringify({lat, lon, label: label || `${lat.toFixed(2)}, ${lon.toFixed(2)}`})); }catch(_){}
+  try { localStorage.setItem(savedLocationKey, JSON.stringify({lat, lon, label: label || `${lat.toFixed(2)}, ${lon.toFixed(2)}`})); }catch(_){}
 }
 
 // Load cached times if available
@@ -155,22 +164,40 @@ function determineNextPrayer(timings){
   const now = new Date();
   const order = ['Fajr','Dhuhr','Asr','Maghrib','Isha'];
   let nextIdx = null;
+  let nextDate = null;
   for(let i=0;i<order.length;i++){
-    const t = parseTimeToDate(timings[order[i]]);
-    if(t.getTime() > now.getTime()){
-      nextIdx = i; break;
+    const d = parseTimeToDate(timings[order[i]]);
+    if(!d || isNaN(d.getTime())) continue;
+    if(d.getTime() > now.getTime()){
+      nextIdx = i; nextDate = d; break;
     }
   }
-  if(nextIdx === null) nextIdx = 0; // next day -> Fajr
+  if(nextIdx === null){
+    // Next day's Fajr
+    const d0 = parseTimeToDate(timings['Fajr']);
+    if (d0 && !isNaN(d0.getTime())) {
+      nextIdx = 0;
+      // shift to next day
+      nextDate = new Date(d0.getTime() + 24*3600*1000);
+    }
+  }
+  if(nextIdx === null || !nextDate){
+    console.warn('Could not determine next prayer due to invalid timings', timings);
+    return;
+  }
   nextPrayerIndex = nextIdx;
   if (nextPrayerNameEl) nextPrayerNameEl.textContent = order[nextIdx];
   if (nextPrayerTimeEl) nextPrayerTimeEl.textContent = fmtTime24To12(timings[order[nextIdx]]);
-  startCountdown(parseTimeToDate(timings[order[nextIdx]]));
+  startCountdown(nextDate);
   renderPrayerRow(timings);
 }
 
 // Start countdown to target date
 function startCountdown(targetDate){
+  if(!targetDate || isNaN(targetDate.getTime())){
+    console.warn('Invalid target date for countdown', targetDate);
+    return;
+  }
   if(countdownInterval) clearInterval(countdownInterval);
   countdownInterval = setInterval(()=> {
     const now = new Date();
@@ -179,7 +206,6 @@ function startCountdown(targetDate){
       clearInterval(countdownInterval);
       if (remainingTimeEl) remainingTimeEl.textContent = '00:00:00';
       if (countText) countText.textContent = '00:00:00';
-      // refresh prayer times after small delay
       setTimeout(()=> initHomePage(), 2000);
       return;
     }
