@@ -10,6 +10,7 @@
 const prayerNames = ['Fajr','Dhuhr','Asr','Maghrib','Isha'];
 const prayerStorageKey = 'prayerTracker_v1';
 const cachedTimesKey = 'lastPrayerTimes_v1';
+const savedLocationKey = 'savedLocation_v1';
 
 // UI elements
 let nextPrayerNameEl = document.getElementById('nextPrayerName');
@@ -41,6 +42,16 @@ function parseTimeToDate(timeStr){
   const [h,m] = timeStr.split(':').map(Number);
   const d = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m, 0);
   return d;
+}
+
+function loadSavedLocation(){
+  try{
+    const raw = localStorage.getItem(savedLocationKey);
+    return raw ? JSON.parse(raw) : null;
+  }catch(_){ return null; }
+}
+function saveLocation(lat, lon, label){
+  try{ localStorage.setItem(savedLocationKey, JSON.stringify({lat, lon, label: label || `${lat.toFixed(2)}, ${lon.toFixed(2)}`})); }catch(_){}
 }
 
 // Load cached times if available
@@ -97,10 +108,11 @@ function renderTracker(){
   });
 }
 
-// Fetch prayer times using Aladhan
+// Fetch prayer times using Aladhan (timezone-aware)
 async function fetchPrayerTimes(lat, lon){
   try{
-    const resp = await fetch(`https://api.aladhan.com/v1/timings?latitude=${lat}&longitude=${lon}&method=2`);
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const resp = await fetch(`https://api.aladhan.com/v1/timings?latitude=${lat}&longitude=${lon}&method=2&timezonestring=${encodeURIComponent(tz)}`);
     const data = await resp.json();
     if(data.code !== 200) throw new Error('Bad response');
     const timings = data.data.timings;
@@ -225,7 +237,7 @@ async function loadHadith(){
   }
 }
 
-// Init - request geolocation and fetch prayer times
+// Init - prefer saved location, then geolocation
 async function init(){
   renderTracker();
   loadHadith();
@@ -236,26 +248,38 @@ async function init(){
     el.style.strokeDasharray = String(Math.round(circ));
     el.style.strokeDashoffset = String(Math.round(circ));
   }
-  // Try geolocation
+  // Use saved location immediately if present
+  const saved = loadSavedLocation();
+  if (saved) {
+    const countryEl = document.getElementById('country');
+    if (countryEl) countryEl.textContent = saved.label || 'Saved Location';
+    fetchPrayerTimes(saved.lat, saved.lon);
+  }
+  // Try geolocation (may update saved location and refresh times)
   if(navigator.geolocation){
     navigator.geolocation.getCurrentPosition((pos)=>{
       const lat = pos.coords.latitude, lon = pos.coords.longitude;
+      saveLocation(lat, lon);
       const countryEl = document.getElementById('country');
-      if (countryEl) countryEl.textContent = 'Malaysia'; // placeholder: could reverse geocode
+      if (countryEl) countryEl.textContent = 'My Location';
       fetchPrayerTimes(lat, lon);
     }, (err)=>{
       console.warn('geoloc failed', err);
-      const cached = loadCachedTimes();
-      if(cached && cached.timings){
-        todayTimings = cached.timings;
-        renderPrayerRow(todayTimings);
-        determineNextPrayer(todayTimings);
-      }else{
-        if (prayerRow) prayerRow.innerHTML = '<div style="padding:8px;color:var(--muted)">Location denied. Please allow location.</div>';
+      if (!saved) {
+        const cached = loadCachedTimes();
+        if(cached && cached.timings){
+          todayTimings = cached.timings;
+          renderPrayerRow(todayTimings);
+          determineNextPrayer(todayTimings);
+        }else{
+          if (prayerRow) prayerRow.innerHTML = '<div style="padding:8px;color:var(--muted)">Set a location or allow location to show times.</div>';
+        }
       }
     }, {timeout:15000});
   }else{
-    if (prayerRow) prayerRow.innerHTML = '<div style="padding:8px;color:var(--muted)">Geolocation not supported.</div>';
+    if (!saved) {
+      if (prayerRow) prayerRow.innerHTML = '<div style="padding:8px;color:var(--muted)">Geolocation not supported. Please set a location.</div>';
+    }
   }
 }
 
@@ -823,36 +847,7 @@ function initHomePage() {
   hadithText = document.getElementById('hadithText');
   hadithSource = document.getElementById('hadithSource');
 
-  renderTracker();
-  loadHadith();
-  // set initial ring dasharray
-  const circ = 2 * Math.PI * 52;
-  const el = document.querySelector('.fg-ring');
-  if (el) {
-    el.style.strokeDasharray = String(Math.round(circ));
-    el.style.strokeDashoffset = String(Math.round(circ));
-  }
-  // Try geolocation
-  if(navigator.geolocation){
-    navigator.geolocation.getCurrentPosition((pos)=>{
-      const lat = pos.coords.latitude, lon = pos.coords.longitude;
-      const countryEl = document.getElementById('country');
-      if (countryEl) countryEl.textContent = 'Malaysia'; // placeholder: could reverse geocode
-      fetchPrayerTimes(lat, lon);
-    }, (err)=>{
-      console.warn('geoloc failed', err);
-      const cached = loadCachedTimes();
-      if(cached && cached.timings){
-        todayTimings = cached.timings;
-        renderPrayerRow(todayTimings);
-        determineNextPrayer(todayTimings);
-      }else{
-        if (prayerRow) prayerRow.innerHTML = '<div style="padding:8px;color:var(--muted)">Location denied. Please allow location.</div>';
-      }
-    }, {timeout:15000});
-  }else{
-    if (prayerRow) prayerRow.innerHTML = '<div style="padding:8px;color:var(--muted)">Geolocation not supported.</div>';
-  }
+  init();
 }
 
 function openSurah(number) {
