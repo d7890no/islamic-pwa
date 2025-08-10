@@ -29,16 +29,18 @@ let countdownInterval = null;
 
 // Utilities
 function fmtTime24To12(tStr){
-  // input "13:21"
-  const [h,m] = tStr.split(':').map(Number);
+  // Normalize input like "13:21" or "13:21 (TZ)"
+  const clean = extractHHMM(tStr);
+  const [h,m] = clean.split(':').map(Number);
   const am = h < 12;
   const hour = ((h + 11) % 12) + 1;
   return `${hour}:${String(m).padStart(2,'0')} ${am ? 'AM' : 'PM'}`;
 }
 function parseTimeToDate(timeStr){
-  // timeStr like "13:21"
+  // Normalize input like "13:21" or "13:21 (TZ)"
+  const clean = extractHHMM(timeStr);
   const now = new Date();
-  const [h,m] = timeStr.split(':').map(Number);
+  const [h,m] = clean.split(':').map(Number);
   const d = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m, 0);
   return d;
 }
@@ -147,7 +149,11 @@ function determineNextPrayer(timings){
   nextPrayerIndex = nextIdx;
   nextPrayerNameEl.textContent = order[nextIdx];
   nextPrayerTimeEl.textContent = fmtTime24To12(timings[order[nextIdx]]);
-  startCountdown(parseTimeToDate(timings[order[nextIdx]]));
+  let target = parseTimeToDate(timings[order[nextIdx]]);
+  if (target.getTime() <= now.getTime()) {
+    target = new Date(target.getTime() + 24*3600*1000);
+  }
+  startCountdown(target);
   renderPrayerRow(timings);
 }
 
@@ -198,6 +204,14 @@ function updateRing(targetDate){
   const circ = 2 * Math.PI * 52;
   const offset = Math.round(circ * (1 - ratio));
   fgRing.style.strokeDashoffset = offset;
+}
+
+function extractHHMM(raw){
+  const match = String(raw).match(/(\d{1,2}):(\d{2})/);
+  if(!match) return '00:00';
+  const hh = match[1].padStart(2,'0');
+  const mm = match[2];
+  return `${hh}:${mm}`;
 }
 
 // Fetch a small sample hadith (online placeholder JSON)
