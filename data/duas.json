@@ -1,0 +1,57 @@
+[
+  {
+    "id": "morning",
+    "title": "Morning Dua",
+    "category": "Daily",
+    "arabic": "أَصْبَحْنَا وَأَصْبَحَ الْمُلْكُ لِلَّهِ",
+    "transliteration": "Asbahna wa asbahal-mulku lillah",
+    "english": "We have reached the morning and at this very time unto Allah belongs all sovereignty.",
+    "icon": "🌅"
+  },
+  {
+    "id": "evening",
+    "title": "Evening Dua",
+    "category": "Daily",
+    "arabic": "أَمْسَيْنَا وَأَمْسَى الْمُلْكُ لِلَّهِ",
+    "transliteration": "Amsayna wa amsal-mulku lillah",
+    "english": "We have reached the evening and at this very time unto Allah belongs all sovereignty.",
+    "icon": "🌙"
+  },
+  {
+    "id": "eating",
+    "title": "Before Eating",
+    "category": "Meals",
+    "arabic": "بِسْمِ اللَّهِ",
+    "transliteration": "Bismillah",
+    "english": "In the name of Allah.",
+    "icon": "🍽️"
+  },
+  {
+    "id": "travel",
+    "title": "Travel Dua",
+    "category": "Travel",
+    "arabic": "سُبْحَانَ الَّذِي سَخَّرَ لَنَا هَذَا وَمَا كُنَّا لَهُ مُقْرِنِينَ",
+    "transliteration": "Subhanal-ladhi sakhkhara lana hadha wa ma kunna lahu muqrinin",
+    "english": "Glory be to Him who has subjected this to us, and we could never have it (by our efforts).",
+    "icon": "✈️"
+  },
+  {
+    "id": "sleep",
+    "title": "Before Sleep",
+    "category": "Daily",
+    "arabic": "بِاسْمِكَ رَبِّي وَضَعْتُ جَنْبِي وَبِكَ أَرْفَعُهُ",
+    "transliteration": "Bismika rabbi wada'tu janbi wa bika arfa'uh",
+    "english": "In Your name my Lord, I lie down and in Your name I rise.",
+    "icon": "😴"
+  },
+  {
+    "id": "protection",
+    "title": "Protection Dua",
+    "category": "Protection",
+    "arabic": "أَعُوذُ بِكَلِمَاتِ اللَّهِ التَّامَّاتِ مِنْ شَرِّ مَا خَلَقَ",
+    "transliteration": "A'udhu bi kalimatillahi at-tammati min sharri ma khalaq",
+    "english": "I seek refuge in the perfect words of Allah from the evil of what He has created.",
+    "icon": "🛡️"
+  }
+]
+

@@ -1,0 +1,73 @@
+[
+  {
+    "number": 1,
+    "name": "Al-Fatihah",
+    "english": "The Opening",
+    "verses": 7,
+    "type": "Meccan"
+  },
+  {
+    "number": 2,
+    "name": "Al-Baqarah",
+    "english": "The Cow",
+    "verses": 286,
+    "type": "Medinan"
+  },
+  {
+    "number": 3,
+    "name": "Ali 'Imran",
+    "english": "Family of Imran",
+    "verses": 200,
+    "type": "Medinan"
+  },
+  {
+    "number": 18,
+    "name": "Al-Kahf",
+    "english": "The Cave",
+    "verses": 110,
+    "type": "Meccan"
+  },
+  {
+    "number": 36,
+    "name": "Ya-Sin",
+    "english": "Ya Sin",
+    "verses": 83,
+    "type": "Meccan"
+  },
+  {
+    "number": 55,
+    "name": "Ar-Rahman",
+    "english": "The Beneficent",
+    "verses": 78,
+    "type": "Medinan"
+  },
+  {
+    "number": 67,
+    "name": "Al-Mulk",
+    "english": "The Sovereignty",
+    "verses": 30,
+    "type": "Meccan"
+  },
+  {
+    "number": 112,
+    "name": "Al-Ikhlas",
+    "english": "The Sincerity",
+    "verses": 4,
+    "type": "Meccan"
+  },
+  {
+    "number": 113,
+    "name": "Al-Falaq",
+    "english": "The Daybreak",
+    "verses": 5,
+    "type": "Meccan"
+  },
+  {
+    "number": 114,
+    "name": "An-Nas",
+    "english": "Mankind",
+    "verses": 6,
+    "type": "Meccan"
+  }
+]
+
