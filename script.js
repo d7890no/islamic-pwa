@@ -160,16 +160,13 @@ function determineNextPrayer(timings){
 // Start countdown to target date
 function startCountdown(targetDate){
   if(countdownInterval) clearInterval(countdownInterval);
-  const totalMs = targetDate.getTime() - Date.now();
-  // set initial ring
-  updateRing(targetDate);
   countdownInterval = setInterval(()=> {
     const now = new Date();
     let diff = targetDate.getTime() - now.getTime();
     if(diff <= 0){
       clearInterval(countdownInterval);
-      remainingTimeEl.textContent = '00:00:00';
-      countText.textContent = '00:00:00';
+      if (remainingTimeEl) remainingTimeEl.textContent = '00:00:00';
+      if (countText) countText.textContent = '00:00:00';
       // refresh prayer times after small delay
       setTimeout(()=> initHomePage(), 2000);
       return;
@@ -178,10 +175,11 @@ function startCountdown(targetDate){
     const mins = Math.floor(diff/60000); diff%=60000;
     const secs = Math.floor(diff/1000);
     const str = `${String(hrs).padStart(2,'0')}:${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
-    remainingTimeEl.textContent = str;
-    countText.textContent = str;
-    updateRing(targetDate);
-  }, 500);
+    if (remainingTimeEl) remainingTimeEl.textContent = str;
+    if (countText) countText.textContent = str;
+    try { updateRing(targetDate); } catch(_) {}
+  }, 1000);
+  try { updateRing(targetDate); } catch(_) {}
 }
 
 // Update circular ring based on remaining vs total (assumes within same day)
@@ -209,17 +207,21 @@ function updateRing(targetDate){
 
 // Fetch a small sample hadith (online placeholder JSON)
 async function loadHadith(){
+  // show fallback instantly for perceived speed
+  if (hadithText && !hadithText.textContent) hadithText.textContent = "Actions are judged by intentions.";
+  if (hadithSource && !hadithSource.textContent) hadithSource.textContent = "Sahih al-Bukhari";
   try{
-    // using a tiny sample raw gist or fallback to local sample
-    const resp = await fetch('https://raw.githubusercontent.com/itsraveen/islamic-samples/main/hadiths.json');
+    const controller = new AbortController();
+    const t = setTimeout(()=>controller.abort(), 3000);
+    const resp = await fetch('https://raw.githubusercontent.com/itsraveen/islamic-samples/main/hadiths.json', { signal: controller.signal });
+    clearTimeout(t);
+    if (!resp.ok) throw new Error('bad hadith fetch');
     const data = await resp.json();
     const pick = data[Math.floor(Math.random()*data.length)];
     if (hadithText) hadithText.textContent = pick.text;
     if (hadithSource) hadithSource.textContent = pick.source || '—';
   }catch(e){
-    // fallback
-    if (hadithText) hadithText.textContent = "Actions are judged by intentions.";
-    if (hadithSource) hadithSource.textContent = "Sahih al-Bukhari";
+    // keep fallback
   }
 }
 
