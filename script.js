@@ -59,29 +59,34 @@ function saveCachedTimes(data){
 
 // Prayer tracker functions
 function loadTracker(){
-  const raw = localStorage.getItem(prayerStorageKey);
-  if(!raw){
-    const init = {date: new Date().toISOString().slice(0,10), prayers: {Fajr:false,Dhuhr:false,Asr:false,Maghrib:false,Isha:false}};
-    localStorage.setItem(prayerStorageKey, JSON.stringify(init));
-    return init;
+  try {
+    const raw = localStorage.getItem(prayerStorageKey);
+    if(!raw){
+      const init = {date: new Date().toISOString().slice(0,10), prayers: {Fajr:false,Dhuhr:false,Asr:false,Maghrib:false,Isha:false}};
+      try { localStorage.setItem(prayerStorageKey, JSON.stringify(init)); } catch(_) {}
+      return init;
+    }
+    const obj = JSON.parse(raw);
+    // reset every day
+    if(obj.date !== new Date().toISOString().slice(0,10)){
+      const init = {date: new Date().toISOString().slice(0,10), prayers: {Fajr:false,Dhuhr:false,Asr:false,Maghrib:false,Isha:false}};
+      try { localStorage.setItem(prayerStorageKey, JSON.stringify(init)); } catch(_) {}
+      return init;
+    }
+    return obj;
+  } catch (_) {
+    return {date: new Date().toISOString().slice(0,10), prayers: {Fajr:false,Dhuhr:false,Asr:false,Maghrib:false,Isha:false}};
   }
-  const obj = JSON.parse(raw);
-  // reset every day
-  if(obj.date !== new Date().toISOString().slice(0,10)){
-    const init = {date: new Date().toISOString().slice(0,10), prayers: {Fajr:false,Dhuhr:false,Asr:false,Maghrib:false,Isha:false}};
-    localStorage.setItem(prayerStorageKey, JSON.stringify(init));
-    return init;
-  }
-  return obj;
 }
 function togglePrayer(name){
   const st = loadTracker();
   st.prayers[name] = !st.prayers[name];
-  localStorage.setItem(prayerStorageKey, JSON.stringify(st));
+  try { localStorage.setItem(prayerStorageKey, JSON.stringify(st)); } catch(_) {}
   renderTracker();
 }
 function renderTracker(){
   const st = loadTracker();
+  if (!trackerRow) return;
   trackerRow.innerHTML = '';
   prayerNames.forEach(p => {
     const pill = document.createElement('div');
@@ -111,13 +116,14 @@ async function fetchPrayerTimes(lat, lon){
       renderPrayerRow(todayTimings);
       determineNextPrayer(todayTimings);
     }else{
-      prayerRow.innerHTML = '<div style="padding:8px;color:var(--muted)">Cannot load prayer times.</div>';
+      if (prayerRow) prayerRow.innerHTML = '<div style="padding:8px;color:var(--muted)">Cannot load prayer times.</div>';
     }
   }
 }
 
 // Render prayer small row
 function renderPrayerRow(timings){
+  if (!prayerRow) return;
   prayerRow.innerHTML = '';
   const order = ['Fajr','Dhuhr','Asr','Maghrib','Isha'];
   order.forEach(name => {
@@ -145,8 +151,8 @@ function determineNextPrayer(timings){
   }
   if(nextIdx === null) nextIdx = 0; // next day -> Fajr
   nextPrayerIndex = nextIdx;
-  nextPrayerNameEl.textContent = order[nextIdx];
-  nextPrayerTimeEl.textContent = fmtTime24To12(timings[order[nextIdx]]);
+  if (nextPrayerNameEl) nextPrayerNameEl.textContent = order[nextIdx];
+  if (nextPrayerTimeEl) nextPrayerTimeEl.textContent = fmtTime24To12(timings[order[nextIdx]]);
   startCountdown(parseTimeToDate(timings[order[nextIdx]]));
   renderPrayerRow(timings);
 }
@@ -180,6 +186,7 @@ function startCountdown(targetDate){
 
 // Update circular ring based on remaining vs total (assumes within same day)
 function updateRing(targetDate){
+  if (!fgRing) return;
   const now = new Date();
   const total = targetDate.getTime() - now.getTime();
   // find previous prayer time to compute span
@@ -207,12 +214,12 @@ async function loadHadith(){
     const resp = await fetch('https://raw.githubusercontent.com/itsraveen/islamic-samples/main/hadiths.json');
     const data = await resp.json();
     const pick = data[Math.floor(Math.random()*data.length)];
-    hadithText.textContent = pick.text;
-    hadithSource.textContent = pick.source || '—';
+    if (hadithText) hadithText.textContent = pick.text;
+    if (hadithSource) hadithSource.textContent = pick.source || '—';
   }catch(e){
     // fallback
-    hadithText.textContent = "Actions are judged by intentions.";
-    hadithSource.textContent = "Sahih al-Bukhari";
+    if (hadithText) hadithText.textContent = "Actions are judged by intentions.";
+    if (hadithSource) hadithSource.textContent = "Sahih al-Bukhari";
   }
 }
 
@@ -223,13 +230,16 @@ async function init(){
   // set initial ring dasharray
   const circ = 2 * Math.PI * 52;
   const el = document.querySelector('.fg-ring');
-  el.style.strokeDasharray = String(Math.round(circ));
-  el.style.strokeDashoffset = String(Math.round(circ));
+  if (el) {
+    el.style.strokeDasharray = String(Math.round(circ));
+    el.style.strokeDashoffset = String(Math.round(circ));
+  }
   // Try geolocation
   if(navigator.geolocation){
     navigator.geolocation.getCurrentPosition((pos)=>{
       const lat = pos.coords.latitude, lon = pos.coords.longitude;
-      document.getElementById('country').textContent = 'Malaysia'; // placeholder: could reverse geocode
+      const countryEl = document.getElementById('country');
+      if (countryEl) countryEl.textContent = 'Malaysia'; // placeholder: could reverse geocode
       fetchPrayerTimes(lat, lon);
     }, (err)=>{
       console.warn('geoloc failed', err);
@@ -239,11 +249,11 @@ async function init(){
         renderPrayerRow(todayTimings);
         determineNextPrayer(todayTimings);
       }else{
-        prayerRow.innerHTML = '<div style="padding:8px;color:var(--muted)">Location denied. Please allow location.</div>';
+        if (prayerRow) prayerRow.innerHTML = '<div style="padding:8px;color:var(--muted)">Location denied. Please allow location.</div>';
       }
     }, {timeout:15000});
   }else{
-    prayerRow.innerHTML = '<div style="padding:8px;color:var(--muted)">Geolocation not supported.</div>';
+    if (prayerRow) prayerRow.innerHTML = '<div style="padding:8px;color:var(--muted)">Geolocation not supported.</div>';
   }
 }
 
@@ -835,13 +845,11 @@ function initHomePage() {
         renderPrayerRow(todayTimings);
         determineNextPrayer(todayTimings);
       }else{
-        const prayerRowEl = document.getElementById('prayerRow');
-        if (prayerRowEl) prayerRowEl.innerHTML = '<div style="padding:8px;color:var(--muted)">Location denied. Please allow location.</div>';
+        if (prayerRow) prayerRow.innerHTML = '<div style="padding:8px;color:var(--muted)">Location denied. Please allow location.</div>';
       }
     }, {timeout:15000});
   }else{
-    const prayerRowEl = document.getElementById('prayerRow');
-    if (prayerRowEl) prayerRowEl.innerHTML = '<div style="padding:8px;color:var(--muted)">Geolocation not supported.</div>';
+    if (prayerRow) prayerRow.innerHTML = '<div style="padding:8px;color:var(--muted)">Geolocation not supported.</div>';
   }
 }
 
