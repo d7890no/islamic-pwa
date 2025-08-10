@@ -1,80 +1,123 @@
+/* Updated dark, glassy UI inspired by the screenshot */
+:root{
+  --bg1: #071025;
+  --bg2: #0f1b2b;
+  --card-bg: rgba(255,255,255,0.03);
+  --glass: rgba(255,255,255,0.04);
+  --accent: #5ad1ff;
+  --accent-2: #4ec4c8;
+  --muted: #9fb0c0;
+  --white: #eaf6ff;
+  --pill-bg: rgba(255,255,255,0.03);
+  --glass-border: rgba(255,255,255,0.04);
+  --shadow: 0 6px 18px rgba(2,8,23,0.6);
+  font-family: "Inter", "Segoe UI", Roboto, system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+*{box-sizing:border-box}
+html,body,#app{height:100%}
+body{
+  margin:0;
+  background:linear-gradient(180deg,var(--bg1),var(--bg2));
+  color:var(--white);
+  -webkit-tap-highlight-color: transparent;
+}
+.topbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:16px;
+  font-weight:600;
+  color:var(--accent);
+}
+main{padding:14px 12px 90px}
 
-:root {
-  --bg-start: #0a0a23;
-  --bg-end: #1a1a40;
-  --card-bg: rgba(255, 255, 255, 0.08);
-  --text-color: #f0f0f0;
-  --accent-color: #00e0ff;
-  --accent-hover: #00bcd4;
-  --shadow-color: rgba(0, 224, 255, 0.3);
-  font-family: 'Segoe UI', Roboto, sans-serif;
+/* Card */
+.card{
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  border-radius:14px;
+  padding:12px;
+  margin-bottom:12px;
+  backdrop-filter: blur(8px) saturate(120%);
+  border:1px solid var(--glass-border);
+  box-shadow:var(--shadow);
 }
-body {
-  margin: 0;
-  padding: 0;
-  min-height: 100vh;
-  background: linear-gradient(180deg, var(--bg-start), var(--bg-end));
-  color: var(--text-color);
+
+/* Hero */
+.hero{display:flex;align-items:center;gap:12px;padding:14px}
+.hero-left{flex:1}
+.alarm-icon{width:44px;height:44px;border-radius:10px;background:rgba(255,255,255,0.04);display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:8px}
+.next-prayer-label{font-size:12px;color:var(--muted)}
+.next-prayer-name{font-size:16px;margin-top:6px;color:var(--accent)}
+.next-prayer-time{font-size:28px;font-weight:700;margin-top:4px}
+.remaining{font-size:13px;color:var(--muted);margin-top:6px}
+
+/* Countdown SVG */
+.countdown-svg{width:110px;height:110px}
+.bg-ring{fill:none;stroke:rgba(255,255,255,0.06);stroke-width:8}
+.fg-ring{fill:none;stroke:var(--accent);stroke-width:8;stroke-linecap:round;transform-origin:60px 60px;transition:stroke-dashoffset 800ms linear}
+.count-text{fill:var(--white);font-size:12px;font-weight:700}
+
+/* Prayer row */
+.prayer-row{display:flex;gap:8px;padding:10px;overflow:auto}
+.prayer-row .pray{
+  min-width:74px;
+  padding:8px;
+  border-radius:10px;
+  background:var(--pill-bg);
+  text-align:center;
+  font-size:13px;
+  border:1px solid rgba(255,255,255,0.03);
 }
-header {
-  padding: 20px;
-  text-align: center;
-  background: transparent;
+.prayer-row .active{
+  background:linear-gradient(90deg,var(--accent) 0%, var(--accent-2) 100%);
+  color:#02121a;
+  font-weight:700;
+  box-shadow:0 8px 20px rgba(78,196,200,0.12);
 }
-h1 {
-  font-size: 24px;
-  margin: 0;
+
+/* Tools grid */
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.tool{
+  padding:12px;
+  border-radius:12px;
+  background:rgba(255,255,255,0.02);
+  border:1px solid rgba(255,255,255,0.03);
+  color:var(--white);
+  font-weight:600;
+  font-size:13px;
+  min-height:56px;
+  transition:transform .14s ease, box-shadow .14s ease;
 }
-.subtitle {
-  font-size: 14px;
-  opacity: 0.7;
+.tool:active{transform:translateY(4px) scale(.995);box-shadow:none}
+.tool:hover{transform:scale(1.03)}
+
+/* Tracker */
+.tracker h3{margin:0 0 8px 0;font-size:16px}
+.tracker-row{display:flex;gap:8px;flex-wrap:nowrap;overflow:auto;padding-bottom:6px}
+.pill{
+  padding:10px 14px;border-radius:999px;background:var(--pill-bg);border:1px solid rgba(255,255,255,0.03);
+  display:flex;align-items:center;gap:8px;min-width:80px;justify-content:center;font-weight:700;
 }
-main {
-  padding: 16px;
+.pill.checked{background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#02121a;box-shadow:0 8px 18px rgba(78,196,200,0.12)}
+
+/* Hadith */
+.hadith{display:flex;align-items:center;gap:12px}
+.quote{font-size:48px;color:var(--accent);line-height:1}
+.hadith-body h4{margin:0 0 6px 0}
+.hadith-body p{margin:0;color:var(--muted)}
+.hadith-badge{margin-left:auto;background:rgba(255,255,255,0.03);padding:6px 8px;border-radius:8px;color:var(--accent);font-weight:700}
+
+/* Bottom nav */
+.bottom-nav{
+  position:fixed;left:10px;right:10px;bottom:14px;height:64px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  border-radius:20px;display:flex;align-items:center;justify-content:space-around;padding:8px 12px;border:1px solid rgba(255,255,255,0.03);
+  box-shadow:0 10px 30px rgba(2,8,23,0.6)
 }
-.card {
-  background: var(--card-bg);
-  border-radius: 14px;
-  padding: 16px;
-  margin-bottom: 16px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(10px);
-  animation: fadeIn 0.6s ease-in-out;
-}
-button {
-  display: inline-block;
-  padding: 10px 16px;
-  border-radius: 10px;
-  border: none;
-  background: var(--accent-color);
-  color: #000;
-  font-weight: bold;
-  font-size: 14px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 0 10px var(--shadow-color);
-}
-button:hover, button:active {
-  background: var(--accent-hover);
-  transform: scale(1.05);
-  box-shadow: 0 0 15px var(--shadow-color);
-}
-.output {
-  margin-top: 12px;
-  font-size: 14px;
-  line-height: 1.5;
-}
-label {
-  display: block;
-  margin: 10px 0;
-}
-footer {
-  padding: 16px;
-  text-align: center;
-  font-size: 12px;
-  color: #aaa;
-}
-@keyframes fadeIn {
-  from {opacity: 0; transform: translateY(10px);}
-  to {opacity: 1; transform: translateY(0);}
+.nav-btn{background:transparent;border:none;color:var(--muted);font-weight:700;padding:8px 12px;border-radius:12px}
+.nav-btn.active{background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#012022;box-shadow:0 8px 18px rgba(78,196,200,0.12)}
+
+/* responsive */
+@media(min-width:720px){
+  main{max-width:720px;margin:0 auto}
 }
