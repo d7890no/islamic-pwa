@@ -142,6 +142,29 @@ function renderTracker(){
   });
 }
 
+function getTimezoneFallbackLocation(tz){
+  const map = {
+    'Asia/Kuala_Lumpur': {lat: 3.1390, lon: 101.6869, label: 'Kuala Lumpur'},
+    'Asia/Singapore': {lat: 1.3521, lon: 103.8198, label: 'Singapore'},
+    'Asia/Jakarta': {lat: -6.2088, lon: 106.8456, label: 'Jakarta'},
+    'Asia/Dhaka': {lat: 23.8103, lon: 90.4125, label: 'Dhaka'},
+    'Asia/Karachi': {lat: 24.8607, lon: 67.0011, label: 'Karachi'},
+    'Europe/London': {lat: 51.5074, lon: -0.1278, label: 'London'},
+    'Europe/Paris': {lat: 48.8566, lon: 2.3522, label: 'Paris'},
+    'America/New_York': {lat: 40.7128, lon: -74.0060, label: 'New York'},
+    'America/Los_Angeles': {lat: 34.0522, lon: -118.2437, label: 'Los Angeles'},
+  };
+  return map[tz] || null;
+}
+
+function sanitizeTimings(raw){
+  if (!raw) return raw;
+  const keys = ['Fajr','Dhuhr','Asr','Maghrib','Isha'];
+  const out = {...raw};
+  keys.forEach(k => { if (out[k]) out[k] = normalizeToHHMM(out[k]) || out[k]; });
+  return out;
+}
+
 // Fetch prayer times using Aladhan (timezone-aware with settings)
 async function fetchPrayerTimes(lat, lon){
   try{
@@ -152,7 +175,7 @@ async function fetchPrayerTimes(lat, lon){
     const resp = await fetch(url);
     const data = await resp.json();
     if(data.code !== 200) throw new Error('Bad response');
-    const timings = data.data.timings;
+    const timings = sanitizeTimings(data.data.timings);
     todayTimings = timings;
     saveCachedTimes({ts: Date.now(), timings});
     renderPrayerRow(timings);
@@ -307,6 +330,14 @@ async function init(){
     const countryEl = document.getElementById('country');
     if (countryEl) countryEl.textContent = saved.label || 'Saved Location';
     fetchPrayerTimes(saved.lat, saved.lon);
+  } else {
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const fb = getTimezoneFallbackLocation(tz);
+    if (fb) {
+      const countryEl = document.getElementById('country');
+      if (countryEl) countryEl.textContent = fb.label;
+      fetchPrayerTimes(fb.lat, fb.lon);
+    }
   }
   // Try geolocation (may update saved location and refresh times)
   if(navigator.geolocation){
@@ -324,13 +355,13 @@ async function init(){
           todayTimings = cached.timings;
           renderPrayerRow(todayTimings);
           determineNextPrayer(todayTimings);
-        }else{
+        }else if (!getTimezoneFallbackLocation(Intl.DateTimeFormat().resolvedOptions().timeZone)){
           if (prayerRow) prayerRow.innerHTML = '<div style="padding:8px;color:var(--muted)">Set a location or allow location to show times.</div>';
         }
       }
     }, {timeout:15000});
   }else{
-    if (!saved) {
+    if (!saved && !getTimezoneFallbackLocation(Intl.DateTimeFormat().resolvedOptions().timeZone)) {
       if (prayerRow) prayerRow.innerHTML = '<div style="padding:8px;color:var(--muted)">Geolocation not supported. Please set a location.</div>';
     }
   }
