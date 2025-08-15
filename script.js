@@ -237,8 +237,9 @@ async function init(){
   // set initial ring dasharray
   const circ = 2 * Math.PI * 52;
   const el = document.querySelector('.fg-ring');
-  el.style.strokeDasharray = String(Math.round(circ));
-  el.style.strokeDashoffset = String(Math.round(circ));
+  const arcLength = circ * (3 / 4); // 270° arc
+  el.style.strokeDasharray = `${Math.round(arcLength)} ${Math.round(circ)}`;
+  el.style.strokeDashoffset = String(Math.round(arcLength));
   // Try geolocation
   if(navigator.geolocation){
     navigator.geolocation.getCurrentPosition((pos)=>{
@@ -829,10 +830,11 @@ function initHomePage() {
   loadHadith();
   // set initial ring dasharray
   const circ = 2 * Math.PI * 52;
+  const arcLength = circ * (3 / 4); // 270° arc
   const el = document.querySelector('.fg-ring');
   if (el) {
-    el.style.strokeDasharray = String(Math.round(circ));
-    el.style.strokeDashoffset = String(Math.round(circ));
+  	el.style.strokeDasharray = `${Math.round(arcLength)} ${Math.round(circ)}`;
+  	el.style.strokeDashoffset = String(Math.round(arcLength));
   }
   // Try geolocation
   if(navigator.geolocation){
