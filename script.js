@@ -202,7 +202,8 @@ function updateRing(targetDate){
   const ratio = Math.max(0, Math.min(1, remaining / span));
   // circle circumference = 2*pi*r where r=52 -> ~326.7
   const circ = 2 * Math.PI * 52;
-  const offset = Math.round(circ * (1 - ratio));
+const arcLength = circ * (3 / 4);
+const offset = Math.round(arcLength * (1 - ratio));
   fgRing.style.strokeDashoffset = offset;
 }
 
