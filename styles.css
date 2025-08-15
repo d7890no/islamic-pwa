@@ -55,7 +55,15 @@ main{padding:14px 12px 90px}
 /* Countdown SVG */
 .countdown-svg{width:110px;height:110px}
 .bg-ring{fill:none;stroke:rgba(255,255,255,0.06);stroke-width:8}
-.fg-ring{fill:none;stroke:var(--accent);stroke-width:8;stroke-linecap:round;transform-origin:60px 60px;transition:stroke-dashoffset 800ms linear}
+.fg-ring {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 8;
+  stroke-linecap: round;
+  transform: rotate(-90deg);       /* start at top */
+  transform-origin: 60px 60px;     /* center of your SVG */
+  transition: stroke-dashoffset 800ms linear;
+}
 .count-text{fill:var(--white);font-size:12px;font-weight:700}
 
 /* Prayer row */
