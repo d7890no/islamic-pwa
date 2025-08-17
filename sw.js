@@ -1,4 +1,4 @@
-const CACHE_NAME = 'my-islamic-app-v4';
+const CACHE_NAME = 'my-islamic-app-v5';
 const FILES_TO_CACHE = [
   './index.html',
   './styles.css',
