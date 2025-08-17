@@ -27,6 +27,37 @@ let todayTimings = null;
 let nextPrayerIndex = null;
 let countdownInterval = null;
 
+// Date Utilities
+function getHijriDateString() {
+  const hijriMonths = [
+    'Muharram', 'Safar', "Rabi' al-Awwal", "Rabi' al-Thani",
+    'Jumada al-Awwal', 'Jumada al-Thani', 'Rajab', "Sha'ban",
+    'Ramadan', 'Shawwal', "Dhu al-Qi'dah", 'Dhu al-Hijjah'
+  ];
+
+  // Simple Hijri date approximation (for demo purposes)
+  function approximateHijriDate(gregorianDate) {
+    const hijriEpoch = new Date('622-07-16'); // Approximate start of Hijri calendar
+    const daysDiff = Math.floor((gregorianDate - hijriEpoch) / (1000 * 60 * 60 * 24));
+    const hijriYear = Math.floor(daysDiff / 354.37) + 1; // Approximate lunar year
+    const dayOfYear = daysDiff % 354;
+    const hijriMonth = Math.floor(dayOfYear / 29.5) + 1;
+    const hijriDay = Math.floor(dayOfYear % 29.5) + 1;
+
+    return {
+      year: hijriYear,
+      month: Math.min(hijriMonth, 12),
+      day: Math.min(hijriDay, 30)
+    };
+  }
+
+  const today = new Date();
+  const hijriToday = approximateHijriDate(today);
+  return `${hijriToday.day} ${hijriMonths[hijriToday.month - 1]} ${hijriToday.year} AH`;
+}
+
+function getSolarDateString() { return new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }); }
+
 // Utilities
 function fmtTime24To12(tStr){
   // Normalize input like "13:21" or "13:21 (TZ)"
@@ -297,6 +328,11 @@ async function loadHadith(){
 
 // Init - request geolocation and fetch prayer times
 async function init(){
+  const greetingEl = document.getElementById('greeting');
+  const countryEl = document.getElementById('country');
+  if(greetingEl) greetingEl.textContent = getHijriDateString();
+  if(countryEl) countryEl.textContent = getSolarDateString();
+
   renderTracker();
   loadHadith();
   // set initial ring dasharray
@@ -309,7 +345,6 @@ async function init(){
   if(navigator.geolocation){
     navigator.geolocation.getCurrentPosition((pos)=>{
       const lat = pos.coords.latitude, lon = pos.coords.longitude;
-      document.getElementById('country').textContent = 'Malaysia'; // placeholder: could reverse geocode
       fetchPrayerTimes(lat, lon);
     }, (err)=>{
       console.warn('geoloc failed', err);
@@ -352,8 +387,8 @@ function showPage(pageName) {
   const topbar = document.querySelector('.topbar');
   if (pageName === 'home') {
     topbar.innerHTML = `
-      <div class="left">Today</div>
-      <div class="right" id="country">—</div>
+      <div class="left" id="greeting"></div>
+      <div class="right" id="country"></div>
     `;
     showHomePage();
   } else {
@@ -891,6 +926,11 @@ function initHomePage() {
   hadithText = document.getElementById('hadithText');
   hadithSource = document.getElementById('hadithSource');
 
+  const greetingEl = document.getElementById('greeting');
+  const countryEl = document.getElementById('country');
+  if(greetingEl) greetingEl.textContent = getHijriDateString();
+  if(countryEl) countryEl.textContent = getSolarDateString();
+
   renderTracker();
   loadHadith();
   // set initial ring dasharray
@@ -905,8 +945,6 @@ function initHomePage() {
   if(navigator.geolocation){
     navigator.geolocation.getCurrentPosition((pos)=>{
       const lat = pos.coords.latitude, lon = pos.coords.longitude;
-      const countryEl = document.getElementById('country');
-      if (countryEl) countryEl.textContent = 'Malaysia'; // placeholder: could reverse geocode
       fetchPrayerTimes(lat, lon);
     }, (err)=>{
       console.warn('geoloc failed', err);
