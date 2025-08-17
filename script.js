@@ -122,10 +122,12 @@ async function fetchPrayerTimes(lat, lon){
 function renderPrayerRow(timings){
   prayerRow.innerHTML = '';
   const order = ['Fajr','Dhuhr','Asr','Maghrib','Isha'];
+  // Highlight current prayer based on state from determineNextPrayer
+  let currentPrayerName = window.currentPrayerNameForHighlight;
   order.forEach(name => {
     const t = timings[name];
     const el = document.createElement('div');
-    el.className = 'pray' + (name === (nextPrayerIndexName()) ? ' active' : '');
+    el.className = 'pray' + (name === currentPrayerName ? ' active' : '');
     el.innerHTML = `<div style="font-weight:700">${name}</div><div style="font-size:12px;color:var(--muted)">${fmtTime24To12(t)}</div>`;
     prayerRow.appendChild(el);
   });
@@ -138,21 +140,83 @@ function nextPrayerIndexName(){
 function determineNextPrayer(timings){
   const now = new Date();
   const order = ['Fajr','Dhuhr','Asr','Maghrib','Isha'];
-  let nextIdx = null;
-  for(let i=0;i<order.length;i++){
-    const t = parseTimeToDate(timings[order[i]]);
-    if(t.getTime() > now.getTime()){
-      nextIdx = i; break;
+  const prayerTimes = {
+    Fajr: parseTimeToDate(timings.Fajr),
+    Sunrise: parseTimeToDate(timings.Sunrise),
+    Dhuhr: parseTimeToDate(timings.Dhuhr),
+    Asr: parseTimeToDate(timings.Asr),
+    Maghrib: parseTimeToDate(timings.Maghrib),
+    Isha: parseTimeToDate(timings.Isha),
+  };
+  const nextDayFajr = new Date(prayerTimes.Fajr.getTime() + 24 * 3600 * 1000);
+
+  const nextPrayerLabelEl = document.querySelector('.next-prayer-label');
+  let target, label, name, time, currentPrayerForHighlight = null;
+
+  if (now >= prayerTimes.Fajr && now < prayerTimes.Sunrise) {
+    target = prayerTimes.Sunrise;
+    label = 'Fajr ends in';
+    name = 'Sunrise';
+    time = fmtTime24To12(timings.Sunrise);
+    currentPrayerForHighlight = 'Fajr';
+    nextPrayerIndex = 1; // For ring calculation, next prayer is Dhuhr
+  } else if (now >= prayerTimes.Dhuhr && now < prayerTimes.Asr) {
+    target = prayerTimes.Asr;
+    label = 'Dhuhr ends in';
+    name = 'Asr';
+    time = fmtTime24To12(timings.Asr);
+    currentPrayerForHighlight = 'Dhuhr';
+    nextPrayerIndex = 2;
+  } else if (now >= prayerTimes.Asr && now < prayerTimes.Maghrib) {
+    target = prayerTimes.Maghrib;
+    label = 'Asr ends in';
+    name = 'Maghrib';
+    time = fmtTime24To12(timings.Maghrib);
+    currentPrayerForHighlight = 'Asr';
+    nextPrayerIndex = 3;
+  } else if (now >= prayerTimes.Maghrib && now < prayerTimes.Isha) {
+    target = prayerTimes.Isha;
+    label = 'Maghrib ends in';
+    name = 'Isha';
+    time = fmtTime24To12(timings.Isha);
+    currentPrayerForHighlight = 'Maghrib';
+    nextPrayerIndex = 4;
+  } else if (now >= prayerTimes.Isha && now < nextDayFajr) {
+    target = nextDayFajr;
+    label = 'Isha ends in';
+    name = 'Fajr';
+    time = fmtTime24To12(timings.Fajr);
+    currentPrayerForHighlight = 'Isha';
+    nextPrayerIndex = 0;
+  } else {
+    // Between prayers, find the next one
+    label = 'Next prayer';
+    let nextPrayerFound = false;
+    for(let i = 0; i < order.length; i++) {
+        if (prayerTimes[order[i]] > now) {
+            const prayerName = order[i];
+            target = prayerTimes[prayerName];
+            name = prayerName;
+            time = fmtTime24To12(timings[prayerName]);
+            nextPrayerIndex = i;
+            nextPrayerFound = true;
+            break;
+        }
+    }
+    if (!nextPrayerFound) {
+        target = nextDayFajr;
+        name = 'Fajr';
+        time = fmtTime24To12(timings.Fajr);
+        nextPrayerIndex = 0;
     }
   }
-  if(nextIdx === null) nextIdx = 0; // next day -> Fajr
-  nextPrayerIndex = nextIdx;
-  nextPrayerNameEl.textContent = order[nextIdx];
-  nextPrayerTimeEl.textContent = fmtTime24To12(timings[order[nextIdx]]);
-  let target = parseTimeToDate(timings[order[nextIdx]]);
-  if (target.getTime() <= now.getTime()) {
-    target = new Date(target.getTime() + 24*3600*1000);
-  }
+
+  if (nextPrayerLabelEl) nextPrayerLabelEl.textContent = label;
+  nextPrayerNameEl.textContent = name;
+  nextPrayerTimeEl.textContent = time;
+
+  window.currentPrayerNameForHighlight = currentPrayerForHighlight;
+
   startCountdown(target);
   renderPrayerRow(timings);
 }
